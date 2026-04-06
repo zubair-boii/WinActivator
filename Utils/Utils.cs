@@ -89,7 +89,7 @@ namespace WinActivator.AppUtils
         }
 
         // execute script files
-        public static void RunEmbeddedCmd(string resourceName, bool runAsAdmin = false)
+        public static void RunEmbeddedCmd(string resourceName, string cmdFileName, string extraArgs = "", bool runAsAdmin = false)
 
         {
             // 1. Prepare safe directory (NOT temp)
@@ -98,7 +98,7 @@ namespace WinActivator.AppUtils
                 "WinActivator"
             );
 
-            string cmdPath = Path.Combine(baseDir, "TSforge_Activation.cmd");
+            string cmdPath = Path.Combine(baseDir, cmdFileName);
 
             try
             { 
@@ -127,7 +127,7 @@ namespace WinActivator.AppUtils
                 var psi = new ProcessStartInfo
                 {
                     FileName = "cmd.exe",
-                    Arguments = "/c \"" + cmdPath + "\" /Z-WindowsESUOffice",
+                    Arguments = "/c \"" + cmdPath + "\" " + extraArgs,
                     WorkingDirectory = Path.GetDirectoryName(cmdPath)
                 };
 

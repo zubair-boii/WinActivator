@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using WinActivator.AppUtils;
 
 namespace WinActivator.Activators
 {
@@ -11,7 +12,7 @@ namespace WinActivator.Activators
     {
         public static void ActivateWindows()
         {
-            MessageBox.Show("This is from Ohook NameSpace", "Informtaion");
+            Utils.RunEmbeddedCmd("WinActivator.Scripts.Ohook_Activation.cmd", "Ohook_Activation.cmd", "/Ohook");
         }
     }
 }

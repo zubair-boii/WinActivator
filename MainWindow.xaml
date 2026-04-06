@@ -2,7 +2,6 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="WinActivator"
-        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         Width="1000"
         Height="780"
         MinWidth="600"
@@ -97,12 +96,7 @@
                             <!-- Left Side Content -->
                             <StackPanel Grid.Column="0"
                                         Margin="6">
-                                <iconPacks:PackIconIonicons Kind="LockMD"
-                                                            Foreground="#4da3ff"
-                                                            Width="26"
-                                                            Height="26" 
-                                                            Margin="0 10"
-                                                            />
+                                <Image Source="Assets/Icons/tsforge_icon.png" Width="50" Height="50" Stretch="UniformToFill" HorizontalAlignment="Left"/>
 
                                 <TextBlock Text="TSForge Activation"
                                            Style="{StaticResource CardTitle}" />
@@ -139,11 +133,7 @@
                             <!-- Left Side Content -->
                             <StackPanel Grid.Column="0"
                                         Margin="6">
-                                <iconPacks:PackIconIonicons Kind="LinkiOS"
-                                                            Foreground="#4da3ff"
-                                                            Width="26"
-                                                            Margin="0 10"
-                                                            Height="26" />
+                                <Image Source="Assets/Icons/ohook_icon.png" Width="50" Height="50" Stretch="UniformToFill" HorizontalAlignment="Left"/>
 
                                 <TextBlock Text="Ohook Activation"
                                            Style="{StaticResource CardTitle}" />
@@ -179,11 +169,8 @@
                             <!-- Left Side Content -->
                             <StackPanel Grid.Column="0"
                                         Margin="6">
-                                <iconPacks:PackIconIonicons Kind="LaptopiOS"
-                                                            Foreground="#4da3ff"
-                                                            Margin="0 10"
-                                                            Width="26"
-                                                            Height="26" />
+                                <Image Source="Assets/Icons/hwid_icon.png"  Width="50" Height="50" Stretch="UniformToFill" HorizontalAlignment="Left"/>
+
 
                                 <TextBlock Text="HWID Activation"
                                            Style="{StaticResource CardTitle}" />
@@ -234,11 +221,8 @@
                                    Text="Zubair Computer Lab" />
                         <StackPanel Orientation="Horizontal"
                                     Margin="0 5">
-                            <iconPacks:PackIconIonicons Kind="LogoWhatsapp"
-                                                        Foreground="LightGreen"
-                                                        Width="20"
-                                                        VerticalAlignment="Center"
-                                                        Height="20" />
+                            <Image Source="Assets/Icons/whatsapp_icon.png"  Width="20" Height="20" Stretch="UniformToFill" />
+
                             <TextBlock FontSize="13"
                                        Foreground="#AAAAAA"
                                        Text="0336-9141706"

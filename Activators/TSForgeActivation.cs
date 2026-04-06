@@ -12,12 +12,13 @@ namespace WinActivator.Activators
         public static void ActivateWindows()
         {
             
+            Utils.RunEmbeddedCmd("WinActivator.Scripts.TSforge_Activation.cmd", "TSforge_Activation.cmd", "/Z-Windows");
         }
 
         public static void ActivateOffice()
         {
 
-            Utils.RunEmbeddedCmd("WinActivator.Scripts.TSforge_Activation.cmd");
+            Utils.RunEmbeddedCmd("WinActivator.Scripts.TSforge_Activation.cmd", "TSforge_Activation.cmd", "/Z-Office");
         }
     }
 }

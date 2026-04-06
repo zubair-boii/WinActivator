@@ -1,6 +1,7 @@
 ﻿
 
 using System.Windows;
+using WinActivator.AppUtils;
 
 namespace WinActivator.Activators
 {
@@ -8,7 +9,7 @@ namespace WinActivator.Activators
     {
         public static void ActivateWindows()
         {
-            MessageBox.Show("This is from HWID NameSpace", "Informtaion");
+            Utils.RunEmbeddedCmd("WinActivator.Scripts.HWID_Activation.cmd", "HWID_Activation.cmd", "/HWID");
         }
     }
 }

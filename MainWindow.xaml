@@ -4,8 +4,8 @@
         Title="WinActivator"
         Width="1000"
         Height="780"
-        MinWidth="600"
-        MinHeight="500"
+        MinWidth="700"
+        MinHeight="600"
         Background="#1c1c1c">
 
     <Grid Margin="30">
@@ -101,9 +101,9 @@
                                 <TextBlock Text="TSForge Activation"
                                            Style="{StaticResource CardTitle}" />
 
-                                <TextBlock Text="Permanent hardware based digital license."
+                                <TextBlock Text="Permanent hardware based digital license. &#x0a;Best for Windows 10/11."
                                            Style="{StaticResource CardDescription}"
-                                           Margin="0 6 0 0" />
+                                           Margin="0 25 0 0" />
                             </StackPanel>
 
                             <StackPanel VerticalAlignment="Center">
@@ -138,9 +138,9 @@
                                 <TextBlock Text="Ohook Activation"
                                            Style="{StaticResource CardTitle}" />
 
-                                <TextBlock Text="Permanent hardware based digital license."
+                                <TextBlock Text="Advanced MS Office activation without &#x0a;modifying the system files."
                                            Style="{StaticResource CardDescription}"
-                                           Margin="0 6 0 0" />
+                                           Margin="0 25 0 0" />
                             </StackPanel>
 
                             <StackPanel VerticalAlignment="Center">
@@ -175,9 +175,9 @@
                                 <TextBlock Text="HWID Activation"
                                            Style="{StaticResource CardTitle}" />
 
-                                <TextBlock Text="Permanent hardware based digital license."
+                                <TextBlock Text="Specialized Legacy method for older &#x0a;builds and niche compatibility.&#x0a;Best for older windows."
                                            Style="{StaticResource CardDescription}"
-                                           Margin="0 6 0 0" />
+                                           Margin="0 25 0 0" />
                             </StackPanel>
 
                             <StackPanel VerticalAlignment="Center">

@@ -8,9 +8,9 @@ using System.Windows;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("WinActivator")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("App to activate you windows and MS Office, for free for lifetime.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Zubair Computer Lab")]
 [assembly: AssemblyProduct("WinActivator")]
 [assembly: AssemblyCopyright("Copyright ©  2026")]
 [assembly: AssemblyTrademark("")]

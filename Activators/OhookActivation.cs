@@ -10,7 +10,7 @@ namespace WinActivator.Activators
 {
     public class OhookActivation
     {
-        public static void ActivateWindows()
+        public static void ActivateOffice()
         {
             Utils.RunEmbeddedCmd("WinActivator.Scripts.Ohook_Activation.cmd", "Ohook_Activation.cmd", "/Ohook");
         }

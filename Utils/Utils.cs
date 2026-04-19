@@ -12,36 +12,60 @@ namespace WinActivator.AppUtils
     public class Utils
     {
         // determine the operating system e.g, windows 7 ultimate, windows 10 pro
+        // It was slow so i didn't use it 
+        //public static string GetOSInfo(string info)
+        //{
+        //    string registryKeyPath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion";
+        //    // Open the HKLM key for reading
+        //    using (RegistryKey key = Registry.LocalMachine.OpenSubKey(registryKeyPath))
+        //    {
+        //        if (key != null)
+        //        {
+        //            switch (info)
+        //            {
+        //                case "buildID":
+        //                    string currentBuild = key.GetValue("CurrentBuild").ToString();
+        //                    return currentBuild;
+
+        //                case "productName":
+        //                    string productName = key.GetValue("ProductName").ToString();
+        //                    return productName;
+
+        //                case "releaseID":
+        //                    string releaseId = key.GetValue("ReleaseId").ToString();   // e.g., "2004" or "1709"
+        //                    return releaseId;
+
+        //                default:
+        //                    throw new Exception("Usage: buildID | producName | releaseID");
+        //            }
+        //        }
+        //        else
+        //        {
+        //            return "Could not open the registry key.";
+        //        }
+        //    }
+        //}
+
         public static string GetOSInfo(string info)
         {
-            string registryKeyPath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion";
-            // Open the HKLM key for reading
-            using (RegistryKey key = Registry.LocalMachine.OpenSubKey(registryKeyPath))
+            const string path = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion";
+
+            using (var key = Registry.LocalMachine.OpenSubKey(path))
             {
-                if (key != null)
-                {
-                    switch (info)
-                    {
-                        case "buildID":
-                            string currentBuild = key.GetValue("CurrentBuild").ToString();
-                            return currentBuild;
+                if (key == null)
+                    return "Unknown";
 
-                        case "productName":
-                            string productName = key.GetValue("ProductName").ToString();
-                            return productName;
+                if (info == "buildID")
+                    return key.GetValue("CurrentBuild") != null ? key.GetValue("CurrentBuild").ToString() : "Unknown";
 
-                        case "releaseID":
-                            string releaseId = key.GetValue("ReleaseId").ToString();   // e.g., "2004" or "1709"
-                            return releaseId;
+                else if (info == "productName")
+                    return key.GetValue("ProductName") != null ? key.GetValue("ProductName").ToString() : "Unknown";
 
-                        default:
-                            throw new Exception("Usage: buildID | producName | releaseID");
-                    }
-                }
+                else if (info == "releaseID")
+                    return key.GetValue("ReleaseId") != null ? key.GetValue("ReleaseId").ToString() : "Unknown";
+
                 else
-                {
-                    return "Could not open the registry key.";
-                }
+                    return "Invalid parameter";
             }
         }
 
@@ -50,40 +74,48 @@ namespace WinActivator.AppUtils
         {
             try
             {
-                // Query the SoftwareLicensingProduct class for the current OS instance
-                ManagementObjectSearcher searcher = new ManagementObjectSearcher(
-                    "SELECT * FROM SoftwareLicensingProduct WHERE PartialProductKey <> null AND ApplicationId='55c92734-d682-4d71-983e-d6ec3f16059f' AND LicenseIsAddon=False");
-
-                foreach (ManagementObject wmiObject in searcher.Get())
+                // FAST PATH (registry)
+                using (var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(
+                    @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\SoftwareProtectionPlatform"))
                 {
-                    // The LicenseStatus property is a UInt32
-                    uint licenseStatus = (uint)wmiObject["LicenseStatus"];
-
-                    switch (licenseStatus)
+                    if (key != null)
                     {
-                        case 0:
-                            return "Unlicensed"; // Windows is not activated
-                        case 1:
-                            return "Licensed"; // Windows is activated
-                        case 2:
-                            return "OOBGrace"; 
-                        case 3:
-                            return "OOTGrace"; 
-                        case 4:
-                            return "NonGenuineGrace";
-                        case 5:
-                            return "Notification";
-                        case 6:
-                            return "ExtendedGrace";
-                        default:
-                            return "Unknown";
+                        object val = key.GetValue("BackupProductKeyDefault");
+
+                        // If key exists, system is usually activated
+                        if (val != null && !string.IsNullOrEmpty(val.ToString()))
+                        {
+                            return "Licensed";
+                        }
                     }
                 }
-                return "Status not found";
+
+                // FALLBACK (optimized WMI — minimal query)
+                using (var searcher = new System.Management.ManagementObjectSearcher(
+                    "SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE ApplicationID='55c92734-d682-4d71-983e-d6ec3f16059f' AND PartialProductKey IS NOT NULL"))
+                {
+                    foreach (System.Management.ManagementObject obj in searcher.Get())
+                    {
+                        int status = Convert.ToInt32(obj["LicenseStatus"]);
+
+                        switch (status)
+                        {
+                            case 0: return "Unlicensed";
+                            case 1: return "Licensed";
+                            case 2: return "OOBGrace";
+                            case 3: return "OOTGrace";
+                            case 4: return "NonGenuineGrace";
+                            case 5: return "Notification";
+                            case 6: return "ExtendedGrace";
+                            default: return "Unknown";
+                        }
+                    }
+                }
+
+                return "Unknown";
             }
-            catch (ManagementException e)
+            catch
             {
-                MessageBox.Show($"An error occurred while querying WMI: {e.Message}");
                 return "Error";
             }
         }

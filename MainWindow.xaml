@@ -100,21 +100,30 @@
 
                                 <TextBlock Text="TSForge Activation"
                                            Style="{StaticResource CardTitle}" />
+                                <Grid Margin="0 15">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
 
-                                <TextBlock Text="Permanent hardware based digital license. &#x0a;Best for Windows 10/11."
+                                    <RadioButton Grid.Column="0" 
+                                                 Content="Windows"
+                                                 Name="TSforgeWindowsRadioBtn"
+                                                 GroupName="ActivationMethod"
+                                                 HorizontalAlignment="Left" 
+                                                 Style="{StaticResource ModernRadioButton}" />
+
+                                    <RadioButton Grid.Column="1" 
+                                                 Content="Office"
+                                                 Name="TSforgeOfficeRadioBtn"
+                                                 GroupName="ActivationMethod"
+                                                 HorizontalAlignment="Right" 
+                                                 Style="{StaticResource ModernRadioButton}" />
+                                </Grid>
+
+                                <TextBlock Text="Specialized Legacy method for older &#x0a;builds and niche compatibility."
                                            Style="{StaticResource CardDescription}"
-                                           Margin="0 25 0 0" />
-                            </StackPanel>
-
-                            <StackPanel VerticalAlignment="Center">
-                                <!-- Right Side Radio -->
-                                <RadioButton Grid.Column="1"
-                                             VerticalAlignment="Top"
-                                             HorizontalAlignment="Right"
-                                             Style="{StaticResource ModernRadioButton}"
-                                             Margin="6"
-                                             Name="tsforgeRadioBtn"
-                                             GroupName="ActivationMethod" />
+                                            />
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -132,27 +141,30 @@
 
                             <!-- Left Side Content -->
                             <StackPanel Grid.Column="0"
-                                        Margin="6">
+                                        >
                                 <Image Source="Assets/Icons/ohook_icon.png" Width="50" Height="50" Stretch="UniformToFill" HorizontalAlignment="Left"/>
 
                                 <TextBlock Text="Ohook Activation"
                                            Style="{StaticResource CardTitle}" />
 
-                                <TextBlock Text="Advanced MS Office activation without &#x0a;modifying the system files."
+                                <RadioButton Grid.Column="1"
+                                             Style="{StaticResource ModernRadioButton}"
+                                             Margin="0 15"
+                                             Name="OhookRadioBtn"
+                                             Content="Office Only"
+                                             GroupName="ActivationMethod" />
+
+                                <TextBlock Text="Advanced MS Office activation without &#x0a;modifying the system files. "
                                            Style="{StaticResource CardDescription}"
-                                           Margin="0 25 0 0" />
+                                           />
+
+                                
                             </StackPanel>
 
-                            <StackPanel VerticalAlignment="Center">
-                                <!-- Right Side Radio -->
-                                <RadioButton Grid.Column="1"
-                                             VerticalAlignment="Top"
-                                             HorizontalAlignment="Right"
-                                             Style="{StaticResource ModernRadioButton}"
-                                             Margin="6"
-                                             Name="OhookRadioBtn"
-                                             GroupName="ActivationMethod" />
-                            </StackPanel>
+                            <!--<StackPanel VerticalAlignment="Center">
+                                --><!-- Right Side Radio --><!--
+                                
+                            </StackPanel>-->
                         </Grid>
                     </Border>
 
@@ -168,31 +180,27 @@
 
                             <!-- Left Side Content -->
                             <StackPanel Grid.Column="0"
-                                        Margin="6">
+                                        >
                                 <Image Source="Assets/Icons/hwid_icon.png"  Width="50" Height="50" Stretch="UniformToFill" HorizontalAlignment="Left"/>
 
 
                                 <TextBlock Text="HWID Activation"
                                            Style="{StaticResource CardTitle}" />
 
-                                <TextBlock Text="Specialized Legacy method for older &#x0a;builds and niche compatibility.&#x0a;Best for older windows."
-                                           Style="{StaticResource CardDescription}"
-                                           Margin="0 25 0 0" />
-                            </StackPanel>
-
-                            <StackPanel VerticalAlignment="Center">
-                                <!-- Right Side Radio -->
                                 <RadioButton Grid.Column="1"
-                                             VerticalAlignment="Top"
-                                             HorizontalAlignment="Right"
                                              Style="{StaticResource ModernRadioButton}"
-                                             Margin="6"
+                                             Content="Windows 10/11"
+                                             Margin="0 15"
                                              Name="hwidRadioBtn"
                                              GroupName="ActivationMethod" />
+
+                                <TextBlock Text="Permanent hardware based digital license. &#x0a;Best for Windows 10/11."
+                                           Style="{StaticResource CardDescription}"
+                                           />
                             </StackPanel>
                         </Grid>
                     </Border>
-                    
+
 
                 </WrapPanel>
             </StackPanel>

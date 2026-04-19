@@ -218,84 +218,47 @@
     
     
     <!--Modern Custom Radio Button-->
-    <Style x:Key="ModernRadioButton"
-           TargetType="RadioButton">
-
-        <Setter Property="Width"
-                Value="22" />
-        <Setter Property="Height"
-                Value="22" />
-        <Setter Property="Cursor"
-                Value="Hand" />
-
+    <Style x:Key="ModernRadioButton" TargetType="RadioButton">
+        <Setter Property="Height" Value="22" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Foreground" Value="White" />
         <Setter Property="Template">
-
             <Setter.Value>
-
                 <ControlTemplate TargetType="RadioButton">
+                    <StackPanel Orientation="Horizontal" Background="Transparent">
 
-                    <Grid Width="22"
-                          Height="22">
-
-                        <!-- Outer Circle -->
-                        <Ellipse x:Name="OuterCircle"
+                        <Grid Width="22" Height="22">
+                            <Ellipse x:Name="OuterCircle"
                                  Stroke="#888"
                                  StrokeThickness="2"
                                  Fill="Transparent" />
 
-                        <!-- Inner Dot -->
-                        <Ellipse x:Name="InnerCircle"
+                            <Ellipse x:Name="InnerCircle"
                                  Width="10"
                                  Height="10"
                                  Fill="#4da3ff"
                                  Opacity="0" />
+                        </Grid>
 
-                    </Grid>
+                        <ContentPresenter Margin="8,0,0,0" 
+                                    VerticalAlignment="Center" />
+                    </StackPanel>
 
                     <ControlTemplate.Triggers>
-
-                        <!-- Checked -->
-                        <Trigger Property="IsChecked"
-                                 Value="True">
-
-                            <Setter TargetName="OuterCircle"
-                                    Property="Stroke"
-                                    Value="#4da3ff" />
-
-                            <Setter TargetName="InnerCircle"
-                                    Property="Opacity"
-                                    Value="1" />
-
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="OuterCircle" Property="Stroke" Value="#4da3ff" />
+                            <Setter TargetName="InnerCircle" Property="Opacity" Value="1" />
                         </Trigger>
-
-                        <!-- Hover -->
-                        <Trigger Property="IsMouseOver"
-                                 Value="True">
-
-                            <Setter TargetName="OuterCircle"
-                                    Property="Stroke"
-                                    Value="#4da3ff" />
-
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="OuterCircle" Property="Stroke" Value="#4da3ff" />
                         </Trigger>
-
-                        <!-- Disabled -->
-                        <Trigger Property="IsEnabled"
-                                 Value="False">
-
-                            <Setter TargetName="OuterCircle"
-                                    Property="Opacity"
-                                    Value="0.4" />
-
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="OuterCircle" Property="Opacity" Value="0.4" />
                         </Trigger>
-
                     </ControlTemplate.Triggers>
-
                 </ControlTemplate>
-
             </Setter.Value>
-
         </Setter>
-
     </Style>
 
 </ResourceDictionary>

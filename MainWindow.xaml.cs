@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -16,62 +17,71 @@ namespace WinActivator
         public MainWindow()
         {
             InitializeComponent();
+            Loaded += MainWindow_Loaded;
+        }
 
-            string osInfo = AppUtils.Utils.GetOSInfo("productName");
-            OSIdentifierTxt.Text = osInfo;
+        private async void UpdateText()
+        {
+            OSIdentifierTxt.Text = "Loading...";
+            ActivationStatusTxt.Text = "Checking...";
 
-            string osActivationStatus = AppUtils.Utils.GetWindowsActivationStatus();
+            try
+            {
+                var result = await Task.Run(() =>
+                {
+                    string osInfo = AppUtils.Utils.GetOSInfo("productName");
+                    string status = AppUtils.Utils.GetWindowsActivationStatus();
+
+                    return (osInfo, status);
+                });
+
+                OSIdentifierTxt.Text = result.osInfo ?? "NULL";
+                ApplyActivationStatus(result.status);
+            }
+            catch (Exception ex)
+            {
+                ActivationStatusTxt.Text = "Error";
+                MessageBox.Show(ex.ToString()); // IMPORTANT
+            }
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            UpdateText();
+        }
+
+        private void ApplyActivationStatus(string osActivationStatus)
+        {
             if (osActivationStatus == "Licensed")
             {
                 ActivationStatusTxt.Text = osActivationStatus + " Healthy";
-                ActivationStatusTxt.Foreground = new SolidColorBrush(Colors.LimeGreen);
+                ActivationStatusTxt.Foreground = Brushes.LimeGreen;
             }
             else if (osActivationStatus == "Unlicensed")
             {
                 ActivationStatusTxt.Text = "Windows is not activated";
-                ActivationStatusTxt.Foreground = new SolidColorBrush(Colors.Red);
-            }
-            else if (osActivationStatus == "Pre-Activation Trial")
-            {
-                ActivationStatusTxt.Text = "OOBGrace";
-                ActivationStatusTxt.Foreground = new SolidColorBrush(Colors.Orange);
-            }
-            else if (osActivationStatus == "OOTGrace")
-            {
-                ActivationStatusTxt.Text = "OOTGrace";
-                ActivationStatusTxt.Foreground = new SolidColorBrush(Colors.Orange);
-            }
-            else if (osActivationStatus == "NonGenuineGrace")
-            {
-                ActivationStatusTxt.Text = "NonGenuineGrace";
-                ActivationStatusTxt.Foreground = new SolidColorBrush(Colors.Orange);
+                ActivationStatusTxt.Foreground = Brushes.Red;
             }
             else if (osActivationStatus == "Notification")
             {
                 ActivationStatusTxt.Text = "Windows Not Activated";
-                ActivationStatusTxt.Foreground = new SolidColorBrush(Colors.Red);
-            }
-            else if (osActivationStatus == "ExtendedGrace")
-            {
-                ActivationStatusTxt.Text = "ExtendedGrace";
-                ActivationStatusTxt.Foreground = new SolidColorBrush(Colors.Orange);
+                ActivationStatusTxt.Foreground = Brushes.Red;
             }
             else
             {
-                ActivationStatusTxt.Text = "Unknown Status";
-                ActivationStatusTxt.Foreground = new SolidColorBrush(Colors.Orange);
+                ActivationStatusTxt.Text = osActivationStatus ?? "Unknown Status";
+                ActivationStatusTxt.Foreground = Brushes.Orange;
             }
-
         }
 
 
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (tsforgeRadioBtn.IsChecked != true)
-                tsforgeRadioBtn.IsChecked = true;
+            if (TSforgeWindowsRadioBtn.IsChecked != true)
+                TSforgeWindowsRadioBtn.IsChecked = true;
             else
-                tsforgeRadioBtn.IsChecked = false;
+                TSforgeWindowsRadioBtn.IsChecked = false;
         }
 
         private void Ohook_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -90,36 +100,58 @@ namespace WinActivator
                 hwidRadioBtn.IsChecked = false;
         }
 
-        private void ActivateButton_Click(object sender, RoutedEventArgs e)
+        private async void ActivateButton_Click(object sender, RoutedEventArgs e)
         {
             string selectedMethod = null;
 
-            if (tsforgeRadioBtn.IsChecked == true)
-                selectedMethod = tsforgeRadioBtn.Name;
+            if (TSforgeWindowsRadioBtn.IsChecked == true)
+                selectedMethod = TSforgeWindowsRadioBtn.Name;
+            else if (TSforgeOfficeRadioBtn.IsChecked == true)
+                selectedMethod = TSforgeOfficeRadioBtn.Name;
             else if (hwidRadioBtn.IsChecked == true)
                 selectedMethod = hwidRadioBtn.Name;
             else if (OhookRadioBtn.IsChecked == true)
                 selectedMethod = OhookRadioBtn.Name;
 
             if (selectedMethod == null)
-                MessageBox.Show("Please select an activation method.", "Information");
-
-
-            switch (selectedMethod)
             {
-                case "tsforgeRadioBtn":
-                    TSForgeActivation.ActivateOffice();
-                    break;
-
-                case "OhookRadioBtn":
-                    OhookActivation.ActivateWindows();
-                    break;
-
-                case "hwidRadioBtn":
-                    HWIDActivation.ActivateWindows();
-                    break;
+                MessageBox.Show("Please select an activation method.", "Information");
+                return;
             }
 
+            ActivateButton.IsEnabled = false;
+
+            await Task.Run(() =>
+            {
+                switch (selectedMethod)
+                {
+                    case "TSforgeWindowsRadioBtn":
+                        TSForgeActivation.ActivateWindows();
+                        
+                        break;
+
+                    case "TSforgeOfficeRadioBtn":
+                        TSForgeActivation.ActivateOffice();
+
+                        break;
+
+                    case "OhookRadioBtn":
+                        OhookActivation.ActivateOffice();
+
+                        break;
+
+                    case "hwidRadioBtn":
+                        HWIDActivation.ActivateWindows();
+
+                        break;
+                }
+            });
+
+            // 2. Now that we are back on the UI thread (thanks to await), 
+            // it is safe to update the text.
+            UpdateText();
+
+            ActivateButton.IsEnabled = true;
         }
     }
 }

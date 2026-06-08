@@ -274,7 +274,7 @@
                 <TextBlock FontSize="13"
                            Foreground="#AAAAAA"
                            Margin="20 5"
-                           Text="Version 2.0.0" />
+                           Text="Version 2.2.0" />
             </StackPanel>
 
             <!-- Footer right: button -->

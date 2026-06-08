@@ -1,0 +1,13 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\SOFTWARE\DownloadManager]
+
+"LstCheck"=-
+"radxcnt"=-
+"FName"="Cracked By ZubairComputerLab"
+"LName"=" "
+"nLst"=dword:00000001
+
+[HKEY_CURRENT_USER\SOFTWARE\DownloadManager\maxID]
+
+"maxID"=dword:00000001

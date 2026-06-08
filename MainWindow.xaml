@@ -201,6 +201,39 @@
                         </Grid>
                     </Border>
 
+                    <!-- Card 4 -->
+                    <Border Style="{StaticResource HoverCard}"
+                            MouseLeftButtonDown="idmActivation_CardLeftClick"
+                            Margin="8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Left Side Content -->
+                            <StackPanel Grid.Column="0"
+                                        >
+                                <Image Source="/Assets/Icons/idm_icon.png"  Width="50" Height="50" Stretch="UniformToFill" HorizontalAlignment="Left"/>
+
+
+                                <TextBlock Text="IDM Activation"
+                                           Style="{StaticResource CardTitle}" />
+
+                                <RadioButton Grid.Column="1"
+                                             Style="{StaticResource ModernRadioButton}"
+                                             Content="Activate IDM"
+                                             Margin="0 15"
+                                             Name="idmActivationRadioBtn"
+                                             GroupName="ActivationMethod" />
+
+                                <TextBlock Text="Activates your Internet Download Manager. &#x0a;You might need to provide installation directory"
+                                           Style="{StaticResource CardDescription}"
+                                           />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
 
                 </WrapPanel>
             </StackPanel>

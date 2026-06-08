@@ -112,6 +112,8 @@ namespace WinActivator
                 selectedMethod = hwidRadioBtn.Name;
             else if (OhookRadioBtn.IsChecked == true)
                 selectedMethod = OhookRadioBtn.Name;
+            else if (idmActivationRadioBtn.IsChecked == true)
+                selectedMethod = idmActivationRadioBtn.Name;
 
             if (selectedMethod == null)
             {
@@ -144,6 +146,10 @@ namespace WinActivator
                         HWIDActivation.ActivateWindows();
 
                         break;
+
+                    case "idmActivationRadioBtn":
+                        IDMActivation.ActivateIDM();
+                        break;
                 }
             });
 
@@ -152,6 +158,14 @@ namespace WinActivator
             UpdateText();
 
             ActivateButton.IsEnabled = true;
+        }
+
+        private void idmActivation_CardLeftClick(object sender, MouseButtonEventArgs e)
+        {
+            if (idmActivationRadioBtn.IsChecked != true)
+                idmActivationRadioBtn.IsChecked = true;
+            else
+                idmActivationRadioBtn.IsChecked = false;
         }
     }
 }

@@ -1,13 +1,11 @@
 Windows Registry Editor Version 5.00
 
 [HKEY_CURRENT_USER\SOFTWARE\DownloadManager]
-
-"LstCheck"=-
-"radxcnt"=-
-"FName"="Cracked By ZubairComputerLab"
-"LName"=" "
+"LstCheck"=""
+"radxcnt"=
+"idmvers"="v6.42b52 Full"
+"FName"="Zubair"
+"LName"="Computer Lab"
+"Email"="zubair.1556551@gmail.com"
 "nLst"=dword:00000001
-
-[HKEY_CURRENT_USER\SOFTWARE\DownloadManager\maxID]
-
-"maxID"=dword:00000001
+"LaunchOnStart"=dword:00000001

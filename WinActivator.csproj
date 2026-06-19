@@ -152,8 +152,9 @@
     <EmbeddedResource Include="Scripts\Ohook_Activation.cmd" />
     <EmbeddedResource Include="Scripts\TSforge_Activation.cmd" />
     <EmbeddedResource Include="Resources\IDMActivationResources\data.bin" />
+    <EmbeddedResource Include="Resources\IDMActivationResources\dataHlp.bin" />
     <EmbeddedResource Include="Resources\IDMActivationResources\extensions.bin" />
-    <EmbeddedResource Include="Resources\IDMActivationResources\Registry.bin" />
+    <EmbeddedResource Include="Resources\IDMActivationResources\registry.bin" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

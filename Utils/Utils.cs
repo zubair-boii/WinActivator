@@ -7,46 +7,19 @@ using System.Management;
 using System.Reflection;
 using System.Text;
 using System.Windows;
+using System.Windows.Forms;
+using MessageBox = System.Windows.MessageBox;
 
 namespace WinActivator.AppUtils
 {
     public class Utils
     {
-        // determine the operating system e.g, windows 7 ultimate, windows 10 pro
-        // It was slow so i didn't use it 
-        //public static string GetOSInfo(string info)
-        //{
-        //    string registryKeyPath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion";
-        //    // Open the HKLM key for reading
-        //    using (RegistryKey key = Registry.LocalMachine.OpenSubKey(registryKeyPath))
-        //    {
-        //        if (key != null)
-        //        {
-        //            switch (info)
-        //            {
-        //                case "buildID":
-        //                    string currentBuild = key.GetValue("CurrentBuild").ToString();
-        //                    return currentBuild;
 
-        //                case "productName":
-        //                    string productName = key.GetValue("ProductName").ToString();
-        //                    return productName;
-
-        //                case "releaseID":
-        //                    string releaseId = key.GetValue("ReleaseId").ToString();   // e.g., "2004" or "1709"
-        //                    return releaseId;
-
-        //                default:
-        //                    throw new Exception("Usage: buildID | producName | releaseID");
-        //            }
-        //        }
-        //        else
-        //        {
-        //            return "Could not open the registry key.";
-        //        }
-        //    }
-        //}
-
+        /// <summary>
+        /// Method to get information about the operating system based on the provided parameter. It reads from the Windows registry to retrieve details such as build ID, product name, edition ID, registered owner, and release ID. If the requested information is not available or if an invalid parameter is provided, it returns "Unknown" or "Invalid parameter" accordingly.
+        /// </summary>
+        /// <param name="info">The information to retrieve (buildID, productName, editionId, registeredOwner, releaseID).</param>
+        /// <returns>The requested operating system information or an error message.</returns>
         public static string GetOSInfo(string info)
         {
             const string path = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion";
@@ -76,7 +49,10 @@ namespace WinActivator.AppUtils
             }
         }
 
-        // fix : can't detect "pro"
+        /// <summary>
+        /// Gets the Windows edition.
+        /// </summary>
+        /// <returns>The Windows edition.</returns>
         public static string GetWindowsEdition()
         {
             try
@@ -99,7 +75,10 @@ namespace WinActivator.AppUtils
         }
 
 
-        // check if windows is activated or not
+       /// <summary>
+       /// Checks wheter windows is activated or not 
+       /// </summary>
+       /// <returns>different strings based on the activation status</returns>
         public static string GetWindowsActivationStatus()
         {
             try
@@ -150,7 +129,13 @@ namespace WinActivator.AppUtils
             }
         }
 
-        // execute script files
+        /// <summary>
+        /// Extracts an embedded command file from the assembly, saves it to a safe location, and executes it with optional arguments and admin privileges.
+        /// </summary>
+        /// <param name="resourceName">The name of the embedded resource to extract.</param>
+        /// <param name="cmdFileName">The name of the command file to create.</param>
+        /// <param name="extraArgs">Additional arguments for the command.</param>
+        /// <param name="runAsAdmin">Indicates whether to run the command as an administrator.</param>
         public static void RunEmbeddedCmd(string resourceName, string cmdFileName, string extraArgs = "", bool runAsAdmin = false)
 
         {
@@ -252,7 +237,10 @@ namespace WinActivator.AppUtils
             }
         }
 
-        // find idm installation path from registry
+        /// <summary>
+        /// Attempts to locate the installation directory of Internet Download Manager (IDM) by checking registry locations.
+        /// </summary>
+        /// <returns>The path to the IDM installation directory or null if not found.</returns>
         public static string GetIDMPath()
         {
             // 1. HKCU (MOST RELIABLE in your system)
@@ -296,15 +284,19 @@ namespace WinActivator.AppUtils
             return null;
         }
 
-        //extract embedded resource to a temp file
+        /// <summary>
+        /// Extracts an embedded resource from the assembly and saves it to a temporary file. Returns the path to the temporary file or null if extraction fails. The method handles exceptions and provides user feedback if the resource cannot be found or extracted.
+        /// </summary>
+        /// <param name="resourceName">The name of the embedded resource to extract.</param>
+        /// <returns>The path to the temporary file or null if extraction fails.</returns>
         public static string ExtractEmbeddedResource(string resourceName)
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
             using (Stream stream = assembly.GetManifestResourceStream(resourceName))
             {
+                
                 if (stream == null)
                 {
-                    MessageBox.Show($"Error: Embedded resource '{resourceName}' not found. The application might be corrupt.", "Resource Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return null;
                 }
 
@@ -327,22 +319,31 @@ namespace WinActivator.AppUtils
             }
         }
 
-        // helper function for selecting a folder
+        /// <summary>
+        /// Helper method to select a folder using FolderBrowserDialog. Returns the selected path or null if cancelled.
+        /// </summary>
+        /// <param name="description">The description for the folder browser dialog.</param>
+        /// <returns>The selected folder path or null if cancelled.</returns>
         public static string SelectFolder(string description)
         {
-            using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
+            // Using declaration ensures the dialog is automatically and promptly disposed
+            var dialog = new FolderBrowserDialog
             {
-                dialog.Description = description;
-                dialog.ShowNewFolderButton = true;
-                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                {
-                    return dialog.SelectedPath;
-                }
-            }
-            return null;
+                Description = description,
+                ShowNewFolderButton = false,
+                RootFolder = Environment.SpecialFolder.MyComputer,
+            };
+
+            return dialog.ShowDialog() == DialogResult.OK ? dialog.SelectedPath : null;
         }
 
-        private static bool RunCommand(string fileName, string arguments)
+        /// <summary>
+        /// Runs a command-line process with the specified file name and arguments. waits for exit.
+        /// </summary>
+        /// <param name="fileName">The name of the file to execute.</param>
+        /// <param name="arguments">The arguments for the command-line process.</param>
+        /// <returns>Returns true if the process exits successfully, false otherwise.</returns>
+        public static bool RunCommand(string fileName, string arguments)
         {
             try
             {
@@ -371,45 +372,12 @@ namespace WinActivator.AppUtils
             }
         }
 
-        public static bool BackupFiles(string idmPath, string BackupPath, string IdmEXE, string IdmRegistryKey)
-        {
-            try
-            {
-                if (Directory.Exists(BackupPath))
-                {
-                    Directory.Delete(BackupPath, true); // Remove old backup
-                }
-                Directory.CreateDirectory(BackupPath);
 
-                string idmExePath = Path.Combine(idmPath, IdmEXE);
-                string backupExePath = Path.Combine(BackupPath, IdmEXE + ".bak");
-                string backupRegPath = Path.Combine(BackupPath, "Registry_Backup.reg");
-
-                if (File.Exists(idmExePath))
-                {
-                    File.Copy(idmExePath, backupExePath, true);
-                }
-                else
-                {
-
-                }
-
-                // Use reg export command for simplicity and reliability
-                if (!RunCommand("reg", $"export \"{IdmRegistryKey}\" \"{backupRegPath}\" /y"))
-                {
-                    MessageBox.Show("Failed to back up registry keys.", "Backup Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return false;
-                }
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to create backup: {ex.Message}", "Backup Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-        }
-
+        /// <summary>
+        /// Imports a registry file using regedit.exe with silent mode. It handles exceptions and provides user feedback if the import process fails. The method ensures that the registry file is correctly quoted to handle spaces in the path.
+        /// </summary>
+        /// <param name="tempRegFilePath">The path to the temporary registry file to import.</param>
+        /// <returns>Returns true if the import is successful, false otherwise.</returns>
         public static bool ImportRegistryFile(string tempRegFilePath)
         {
             string regFileName = Path.GetFileName(tempRegFilePath);
@@ -424,7 +392,9 @@ namespace WinActivator.AppUtils
             return true;
         }
 
-        // Cleanup manager for temporary files (optional, can be used if you prefer temp extraction)
+        /// <summary>
+        /// A helper class to manage temporary files created during the application's execution. It allows registering temporary file paths and provides a method to clean up all registered files at once. The SafeDelete method is used to attempt deletion of files while ignoring any exceptions that may occur due to locked files or access issues.
+        /// </summary>
         public static class TempCleanupManager
         {
             private static readonly List<string> _tempFiles = new List<string>();

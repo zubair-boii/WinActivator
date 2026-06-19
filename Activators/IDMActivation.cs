@@ -17,77 +17,120 @@ namespace WinActivator.Activators
     {
         // thanks to oop7 for the code. link: https://codeberg.org/oop7/IDM-Activator
 
+        // default installation path for IDM (recommended)
         private const string DefaultIdmPathX86 = "C:\\Program Files (x86)\\Internet Download Manager";
+
+        // IDM execuatabe name
         private const string IdmExecutable = "IDMan.exe";
+
+        // IDMGrHlp executable name
+        private const string IdmGrHlpExecutable = "IDMGrHlp.exe";
+
+        // IDM process name (without .exe extension)
         private const string IdmProcessName = "IDMan";
+
+        // Backup directory name for original files and registry keys to store.
         private const string BackupDirName = "backup";
+
+        // Registry key and value name for IDM version, used for backup and validation purposes during activation.
         private const string IdmRegistryKey = @"HKEY_CURRENT_USER\Software\DownloadManager";
-        private const string IdmVersionValueName = "idmvers";
-        private static readonly List<string> SupportedVersions = new List<string> { "v6.42b64 Full", "v6.42b64 Trial", "v6.42b64" };
+
+        //Store paths to extracted temp files
+        private List<string> _tempFiles = new List<string>();
+
+        // path to backup directory for original files and registry keys
+        private static string BackupPath => Path.Combine(Utils.GetIDMPath(), BackupDirName);
+
+        // idm installation path
+        private static string idmPath = null;
+
+        // temp variables to hold paths of extracted resources, will be cleaned up in finally block
+        private static string tempData = null;
+        private static string tempReg = null;
+        private static string tempExtensions = null;
+        private static string tempDataHlp = null;
 
         // Embedded Resources for idm activation
         private const string ResDataBin = "WinActivator.Resources.IDMActivationResources.data.bin";
-        private const string ResRegistryBin = "WinActivator.Resources.IDMActivationResources.Registry.bin";
-        //private const string ResExtensionsBin = "WinActivator.Resources.IDMActivationResources.bin";
+        private const string ResRegistryBin = "WinActivator.Resources.IDMActivationResources.registry.bin";
+        private const string ResExtensionsBin = "WinActivator.Resources.IDMActivationResources.extensions.bin";
+        private const string ResDataHlp = "WinActivator.Resources.IDMActivationResources.dataHlp.bin";
 
-        // Store paths to extracted temp files
-        private List<string> _tempFiles = new List<string>();
-
-        private static string BackupPath => Path.Combine(Utils.GetIDMPath(), BackupDirName);
-
+        /// <summary>
+        /// This is the method that actually activates the IDM.
+        /// </summary>
         public static void ActivateIDM()
         {
-            string idmPath = Utils.GetIDMPath();
+            // get idm installation path from registry or default path
+            idmPath = Utils.GetIDMPath() ?? DefaultIdmPathX86;
 
+            // validate the idm path
             if (!ValidateIDMPath(idmPath))
             {
-                MessageBox.Show(
-                    "IDM installation not found. Select correct folder.",
-                    "Not Found",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                // Safely fetch the folder path from the UI Thread
+                idmPath = System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    Utils.SelectFolder("Please Select your IDM installation folder.")
+                );
 
-                idmPath = Utils.SelectFolder("Select a folder");
-                if (!ValidateIDMPath(idmPath))
+                // Strict validation check after user interaction
+                if (string.IsNullOrEmpty(idmPath) || !ValidateIDMPath(idmPath))
+                {
                     return;
+                }
             }
-
-            string tempData = null;
-            string tempReg = null;
 
             try
             {
+                // extract resources to temp files 
                 tempData = Utils.ExtractEmbeddedResource(ResDataBin);
-                Utils.TempCleanupManager.Register(tempData);
                 tempReg = Utils.ExtractEmbeddedResource(ResRegistryBin);
-                Utils.TempCleanupManager.Register(tempReg);
+                tempExtensions = Utils.ExtractEmbeddedResource(ResExtensionsBin);
+                tempDataHlp = Utils.ExtractEmbeddedResource(ResDataHlp);
 
-                if (tempData == null || tempReg == null)
+                // validate that the resources were extracted successfully
+                if (tempData == null || tempReg == null || tempExtensions == null)
+                {
+                    MessageBox.Show("Failed to extract necessary resources for activation.", "Resource Extraction Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
+                }
 
-                if (!Utils.BackupFiles(idmPath, BackupPath, IdmExecutable, IdmRegistryKey))
+                // register files for cleanup
+                Utils.TempCleanupManager.Register(tempData);
+                Utils.TempCleanupManager.Register(tempReg);
+                Utils.TempCleanupManager.Register(tempExtensions);
+                Utils.TempCleanupManager.Register(tempDataHlp);
+
+                // checks if idm is running and terminates it to prevent file access issues during activation
+                if (IsIDMRunning() == true)
+                {
+                    // kill idm process
+                    TerminateIdmProcess();
+                }
+
+
+                // backup original files and registry key before making any changes, if backup fails, abort activation to prevent potential data loss
+                if (!BackupFiles(idmPath, BackupPath, IdmExecutable, IdmRegistryKey, IdmGrHlpExecutable))
                 {
                     MessageBox.Show("Backup failed.");
                     return;
                 }
 
-                if (!CheckIDMVersion())
+                // add the extensions to registry
+                if (!Utils.ImportRegistryFile(tempExtensions))
                 {
-                    MessageBox.Show("Unsupported version.");
+                    MessageBox.Show("Failed to add extensions to registry.");
                     return;
                 }
 
-                if (IsIDMRunning() == true)
+                // copy the activation file to the idm directory, if copy fails, abort activation to prevent partial activation state
+                if(!CopyActivationFiles())
                 {
-                    TerminateIdmProcess();
-                }
-
-                if (!CopyActivationFile(idmPath, tempData))
-                {
-                    MessageBox.Show("File copy failed.");
+                    MessageBox.Show("Failed to copy activation file to IDM directory.");
                     return;
                 }
 
+
+                // import the registry settings from the extracted registry file, if import fails, abort activation to prevent inconsistent registry state
                 if (!Utils.ImportRegistryFile(tempReg))
                 {
                     MessageBox.Show("Registry import failed.");
@@ -102,6 +145,11 @@ namespace WinActivator.Activators
             }
         }
 
+        /// <summary>
+        /// Validates the provided IDM installation path by checking if it exists and contains the required executable.
+        /// </summary>
+        /// <param name="path">this is the string path to validate</param>
+        /// <returns></returns>
         public static bool ValidateIDMPath(string path)
         {
             if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path) || !File.Exists(Path.Combine(path, IdmExecutable)))
@@ -112,35 +160,11 @@ namespace WinActivator.Activators
             return true;
         }
 
-        public static bool CheckIDMVersion()
-        {
-            try
-            {
-                string version = (string)Registry.GetValue(IdmRegistryKey, IdmVersionValueName, null);
 
-                if (string.IsNullOrEmpty(version))
-                {
-                    MessageBox.Show($"Could not read IDM version from registry key:\n{IdmRegistryKey}\\{IdmVersionValueName}\n\nActivation might fail if version is incompatible.", "Version Check Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    // Allow continuing but warn user
-                    return true;
-                }
-
-                if (!SupportedVersions.Contains(version))
-                {
-                    MessageBox.Show($"Unsupported IDM version detected: {version}\nSupported versions: {string.Join(", ", SupportedVersions)}\n\nPlease install the correct IDM version or update the activator.", "Unsupported Version", MessageBoxButton.OK, MessageBoxImage.Error);
-                    // Allow continuing but warn user
-                    return false;
-                }
-
-                return true;
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show($"Error occurred while checking IDM version:\n{e.Message}", "Version Check Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-        }
-
+        /// <summary>
+        /// Terminates all running instances of the IDM process (IDMan.exe) to ensure that files can be modified during activation. It handles exceptions and provides user feedback if termination fails.
+        /// </summary>
+        /// <returns>Returns true if all instances were terminated successfully, false otherwise.</returns>
         private static bool TerminateIdmProcess()
         {
             try
@@ -177,31 +201,113 @@ namespace WinActivator.Activators
             }
         }
 
-        private static bool CopyActivationFile(string idmPath, string tempSourcePath)
+
+        /// <summary>
+        /// Copies the activation file from the temporary source path to the IDM installation directory. It handles exceptions and provides user feedback if the copy operation fails.
+        /// </summary>
+        /// <param name="idmPath">The path to the IDM installation directory.</param>
+        /// <param name="tempSourcePath">The path to the temporary activation file.</param>
+        /// <returns>Returns true if the file was copied successfully, false otherwise.</returns>
+        private static bool CopyActivationFiles()
         {
             try
             {
-                string destPath = Path.Combine(idmPath, IdmExecutable);
-                File.Copy(tempSourcePath, destPath, true);
+                if (string.IsNullOrEmpty(idmPath))
+                {
+                    MessageBox.Show("IDM path is not set.");
+                    return false;
+                }
+
+                if (string.IsNullOrEmpty(tempData) || !File.Exists(tempData))
+                {
+                    MessageBox.Show("Activation resource file not found.");
+                    return false;
+                }
+
+
+                // Copy and overwrite existing file
+                string idmanDest = Path.Combine(idmPath, "IDMan.exe");
+                string grhlpDest = Path.Combine(idmPath, "IDMGrHlp.exe");
+
+                File.Copy(tempData, idmanDest, true);
+                File.Copy(tempDataHlp, grhlpDest, true);
+
                 return true;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error copying activation file ({Path.GetFileName(tempSourcePath)}) to {idmPath}: {ex.Message}\n\nEnsure IDM is closed and you have permissions.", "File Copy Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(
+                $"Copy failed:\n{ex.Message}",
+                "Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
                 return false;
             }
         }
 
+
+        /// <summary>
+        /// Checks if any instances of the IDM process (IDMan.exe) are currently running. This is used to determine if the process needs to be terminated before activation.
+        /// </summary>
+        /// <returns>Returns true if any instances are running, false otherwise.</returns>
         public static bool IsIDMRunning()
         {
             return Process.GetProcessesByName("IDMan").Any();
         }
 
 
+        /// <summary>
+        /// Backs up the IDM executable and relevant registry keys to a specified backup directory.
+        /// </summary>
+        /// <param name="idmPath">The path to the IDM installation directory.</param>
+        /// <param name="BackupPath">The path to the backup directory.</param>
+        /// <param name="IdmEXE">The name of the IDM executable file.</param>
+        /// <param name="IdmRegistryKey">The registry key to back up.</param>
+        /// <returns>Returns true if the backup is successful, false otherwise.</returns>
+        public static bool BackupFiles(string idmPath, string BackupPath, string IdmEXE, string IdmRegistryKey, string IdmGrHlpExecutable)
+        {
+            try
+            {
+                if (Directory.Exists(BackupPath))
+                {
+                    Directory.Delete(BackupPath, true); // Remove old backup
+                }
+                Directory.CreateDirectory(BackupPath);
+
+                string idmExePath = Path.Combine(idmPath, IdmEXE);
+                string idmGrHlpExePath = Path.Combine(idmPath, IdmGrHlpExecutable);
+
+                string backupExePath = Path.Combine(BackupPath, IdmEXE + ".bak");
+                string backupRegPath = Path.Combine(BackupPath, "Registry_Backup.reg");
+                string backupIdmGrHlpPath = Path.Combine(BackupPath, IdmGrHlpExecutable + ".bak");
+
+                if (File.Exists(idmExePath) && File.Exists(idmGrHlpExePath))
+                {
+                    File.Copy(idmExePath, backupExePath, true);
+                    File.Copy(idmGrHlpExePath, backupIdmGrHlpPath, true);
+                }
+                else
+                {
+
+                }
+
+                // Use reg export command for simplicity and reliability
+                if (!Utils.RunCommand("reg", $"export \"{IdmRegistryKey}\" \"{backupRegPath}\" /y"))
+                {
+                    MessageBox.Show("Failed to back up registry keys.", "Backup Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
+                }
+
+
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to create backup: {ex.Message}", "Backup Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+        }
     }
 
 }
-
-
-
-

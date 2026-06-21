@@ -7,9 +7,11 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Forms;
+using HandyControl.Controls;
 
 using WinActivator.AppUtils;
 using MessageBox = System.Windows.MessageBox;
+using WinActivator.Services;
 
 namespace WinActivator.Activators
 {
@@ -51,8 +53,8 @@ namespace WinActivator.Activators
         private static string tempDataHlp = null;
 
         // Embedded Resources for idm activation
-        private const string ResDataBin = "WinActivator.Resources.IDMActivationResources.data.bin";
-        private const string ResRegistryBin = "WinActivator.Resources.IDMActivationResources.registry.bin";
+        private const string ResDataBin = "WinActivator.Resources.IDMActivationResources.ata.bin";
+        private const string ResRegistryBin = "WinActivator.Resources.IDMActivationResources.egistry.bin";
         private const string ResExtensionsBin = "WinActivator.Resources.IDMActivationResources.extensions.bin";
         private const string ResDataHlp = "WinActivator.Resources.IDMActivationResources.dataHlp.bin";
 
@@ -90,7 +92,8 @@ namespace WinActivator.Activators
                 // validate that the resources were extracted successfully
                 if (tempData == null || tempReg == null || tempExtensions == null)
                 {
-                    MessageBox.Show("Failed to extract necessary resources for activation.", "Resource Extraction Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    //MessageBox.Show("Failed to extract necessary resources for activation.", "Resource Extraction Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    NotificationService.Error("Failed to extract necessary resources.");
                     return;
                 }
 
@@ -111,21 +114,21 @@ namespace WinActivator.Activators
                 // backup original files and registry key before making any changes, if backup fails, abort activation to prevent potential data loss
                 if (!BackupFiles(idmPath, BackupPath, IdmExecutable, IdmRegistryKey, IdmGrHlpExecutable))
                 {
-                    MessageBox.Show("Backup failed.");
+                    NotificationService.Error("Backup failed. Activation aborted.");
                     return;
                 }
 
                 // add the extensions to registry
                 if (!Utils.ImportRegistryFile(tempExtensions))
                 {
-                    MessageBox.Show("Failed to add extensions to registry.");
+                    NotificationService.Error("Failed to add file extensions. Activation aborted.");
                     return;
                 }
 
                 // copy the activation file to the idm directory, if copy fails, abort activation to prevent partial activation state
                 if(!CopyActivationFiles())
                 {
-                    MessageBox.Show("Failed to copy activation file to IDM directory.");
+                    NotificationService.Error("Failed to copy activation file to IDM directory. Activation aborted.");
                     return;
                 }
 
@@ -133,11 +136,11 @@ namespace WinActivator.Activators
                 // import the registry settings from the extracted registry file, if import fails, abort activation to prevent inconsistent registry state
                 if (!Utils.ImportRegistryFile(tempReg))
                 {
-                    MessageBox.Show("Registry import failed.");
+                    NotificationService.Error("Registry import failed. Activation aborted.");
                     return;
                 }
 
-                MessageBox.Show("IDM Activated successfully", "Activation Succesfull.");
+                NotificationService.Success("IDM Activated successfully. Enjoy!");
             }
             finally
             {
@@ -154,7 +157,7 @@ namespace WinActivator.Activators
         {
             if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path) || !File.Exists(Path.Combine(path, IdmExecutable)))
             {
-                MessageBox.Show($"Error: IDM installation not found or {IdmExecutable} is missing in the specified path:\n{path}", "Invalid Path", MessageBoxButton.OK, MessageBoxImage.Error);
+                NotificationService.Error("IDM installation path is invalid. Please select correct path to idm folder.");
                 return false;
             }
             return true;

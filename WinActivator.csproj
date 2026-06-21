@@ -75,6 +75,9 @@
     <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="HandyControl, Version=3.5.1.0, Culture=neutral, PublicKeyToken=45be8712787a1e5b, processorArchitecture=MSIL">
+      <HintPath>packages\HandyControl.3.5.1\lib\net472\HandyControl.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Xaml.Behaviors.Wpf.1.1.77\lib\net462\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
@@ -105,7 +108,16 @@
     <Compile Include="Activators\IDMActivation.cs" />
     <Compile Include="Activators\OhookActivation.cs" />
     <Compile Include="Activators\TSForgeActivation.cs" />
-    <Compile Include="Utils\Utils.cs" />
+    <Compile Include="Controls\ActivationCard.xaml.cs">
+      <DependentUpon>ActivationCard.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Services\DialogService.cs" />
+    <Compile Include="Services\NotificationService.cs" />
+    <Compile Include="Services\Utils.cs" />
+    <Page Include="Controls\ActivationCard.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -119,9 +131,9 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Styles\Controls.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="Styles\Styles.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -148,13 +160,13 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <EmbeddedResource Include="Scripts\HWID_Activation.cmd" />
-    <EmbeddedResource Include="Scripts\Ohook_Activation.cmd" />
-    <EmbeddedResource Include="Scripts\TSforge_Activation.cmd" />
-    <EmbeddedResource Include="Resources\IDMActivationResources\data.bin" />
+    <EmbeddedResource Include="Resources\Scripts\HWID_Activation.cmd" />
+    <EmbeddedResource Include="Resources\Scripts\Ohook_Activation.cmd" />
+    <EmbeddedResource Include="Resources\Scripts\TSforge_Activation.cmd" />
     <EmbeddedResource Include="Resources\IDMActivationResources\dataHlp.bin" />
     <EmbeddedResource Include="Resources\IDMActivationResources\extensions.bin" />
     <EmbeddedResource Include="Resources\IDMActivationResources\registry.bin" />
+    <EmbeddedResource Include="Resources\IDMActivationResources\data.bin" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -163,7 +175,7 @@
     <Resource Include="Assets\Icons\whatsapp_icon.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="images\1.png" />
+    <Resource Include="Images\1.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Assets\Icons\hwid_icon.png" />
@@ -187,6 +199,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Assets\Icons\idm_icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Views\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
